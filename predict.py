@@ -11,7 +11,7 @@ import random
 import comm
 from feature import Feature
 
-model_path = "./submissions/model_rfc-1_0.8133"
+model_path = "./submissions/model_neural_clf_0.8336"
 reslut_path = model_path.replace('model', 'reslut').replace('0.', '')
 reslut_path = reslut_path + ".csv"
 model = comm.load_file(model_path)
@@ -25,10 +25,10 @@ proba = predict_proba[:, 1]
 
 data = []
 idx = 1
-diff = 0  # 记录偏移量  id中没有 355
+diff = 1  # 记录偏移量  id中没有 355
 while (idx < 2713):
     if ids[idx - diff] != idx:
-        r = random.random()
+        r = float("{:.4f}".format(random.random()))
         data.append([idx, r])
         idx += 1
         diff += 1
