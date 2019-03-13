@@ -15,15 +15,15 @@ from __future__ import unicode_literals
 
 import itertools
 import unicodedata
-import config
 
 import os
+import pandas as pd
 import re
 import torch
 
 import comm
+import config
 from logger import logger
-import pandas as pd
 
 USE_CUDA = torch.cuda.is_available()
 USE_CUDA = False
@@ -91,8 +91,6 @@ class Voc:
 
         for word in keep_words:
             self.addWord(word)
-
-
 
 
 # Turn a Unicode string to plain ASCII, thanks to
@@ -182,11 +180,12 @@ def zeroPadding(data, fillvalue=PAD_token):
     padded_data = itertools.zip_longest(*data, fillvalue=fillvalue)
     return list(padded_data)
 
+
 def padding(data, voc, fillvalue=PAD_token):
     vec = [indexesFromSentence(voc, sentence) for sentence in data]
     result = []
     for v in vec:
-        if len(v)< config.word_max_length:
+        if len(v) < config.word_max_length:
             while len(v) < config.word_max_length:
                 v.append(PAD_token)
             result.append(v)
@@ -198,13 +197,10 @@ def padding(data, voc, fillvalue=PAD_token):
     return result
 
 
-
 def inputVec(data, voc):
     indexes_batch = [indexesFromSentence(voc, sentence) for sentence in data]
     padList = zeroPadding(indexes_batch)
     return padList
-
-
 
 
 def get_word_vec(data):

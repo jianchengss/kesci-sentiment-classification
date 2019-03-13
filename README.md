@@ -21,9 +21,11 @@ https://github.com/jianchengss/kesci-sentiment-classification.git
 
 实验结果摘要：
 
-Date    | SHA     | Method |AUC     |AUC-kesci| P | R |F
+Date    | SHA     | Method |AUC-train  |AUC-kesci| P | R |F
 ---     |---      |---     |---|---|---|---|---
-20190307|8225844  |random   |-      |0.5057 |  |
+20190307|8225844  |random   |-      |0.5057 | - | -| -|
 20190312|05a6790  |rfc-1    |0.8130 |0.8054 |0.7516 |0.7542 | 0.7520
 20190312|d4e00a1  |neural_clf|0.8336 |0.8357 |0.7831 |0.7638 | 0.7728
 20190313|9dae25e  |forest-2 |0.8269 |0.8229 |0.7602 |0.7726 | 0.7656
+20190313|78f2dc7  |neural_clf |0.8352 |0.8412 |0.7723 |0.7806 | 0.7762
+20190313|         |soft_max |0.8369 |0.8250 |0.7574 |0.7911 | 0.7739
