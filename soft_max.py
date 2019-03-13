@@ -47,7 +47,7 @@ def predict(x, net):
 
 
 def train(x, y):
-    epoches = 10
+    epoches = 100
     all_loss = 0
     net = SoftMax(n_feature=len(x[0]), n_hidden=10, n_out=2)
     opitmizer = torch.optim.SGD(net.parameters(), lr=0.03)
@@ -92,7 +92,9 @@ def cv():
 
     r = Report()
     auc = r.report_one_folder(test_y, proba)
-    comm.save_file(net, './data/model-{:4f}'.format(auc))
+    model_path = './data/model-{:4f}'.format(auc)
+    comm.save_file(net, model_path)
+    return  model_path
 
 
 def predict_submission(net, path):
@@ -109,9 +111,9 @@ def predict_submission(net, path):
 
 
 if __name__ == "__main__":
-    # cv()
+    model_path = cv()
 
-    model_path = './data/model-0.8369'
+    # model_path = './data/model-0.8369'
     net = comm.load_file(model_path)
     result_path = model_path.replace('model', 'result') + ".csv"
     predict_submission(net, result_path)
