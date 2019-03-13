@@ -49,10 +49,10 @@ C = 1.0
 
 # classfiers['xgb-5']  = xgb_5
 svm_1 = svm.SVC(C=1.0, kernel='rbf', gamma='auto', probability=True)
-rfc_1 = RandomForestClassifier(n_estimators=185, random_state=10)
-rfc_2 = RandomForestClassifier(n_estimators=20, random_state=10)
-rfc_3 = RandomForestClassifier(n_estimators=15, random_state=10)
-rfc_4 = RandomForestClassifier(n_estimators=20, max_depth=13, min_samples_split=80, min_samples_leaf=10,
+rfc_1 = RandomForestClassifier(n_estimators=100, random_state=10)
+rfc_2 = RandomForestClassifier(n_estimators=200, random_state=10)
+rfc_3 = RandomForestClassifier(n_estimators=300, random_state=10)
+rfc_4 = RandomForestClassifier(n_estimators=200, max_depth=13, min_samples_split=80, min_samples_leaf=10,
                                oob_score=True, random_state=10, max_features='sqrt')
 rfc_5 = RandomForestClassifier(random_state=30, n_estimators=30, max_depth=11, max_features=0.5,
                                criterion='entropy', min_samples_split=140, min_samples_leaf=50)
@@ -87,19 +87,19 @@ voting_rfc = VotingClassifier(
     estimators=[('rfc', rfc_1), ('rfc_2', rfc_2), ('rfc_3', rfc_3)],
     voting='soft')
 classfiers['rfc-1'] = rfc_1
-# classfiers['rfc-2'] = rfc_2
-# classfiers['rfc-3'] = rfc_3
-# classfiers['rfc_4'] = rfc_4
+classfiers['rfc-2'] = rfc_2
+classfiers['rfc-3'] = rfc_3
+classfiers['rfc_4'] = rfc_4
 # classfiers['rfc_5'] = rfc_5
 #
-classfiers['neural_clf'] = neural_clf
+# classfiers['neural_clf'] = neural_clf
 # classfiers['nav_clf'] = nav_clf
 # classfiers['grad_clf'] = grad_clf
 # classfiers['tree_clf'] = tree_clf
 # classfiers['forest-1'] = forest_1
 # classfiers['forest-2'] = forest_2
-classfiers['voting_clf'] = voting_clf
-classfiers['voting_rfc'] = voting_rfc
+# classfiers['voting_clf'] = voting_clf
+# classfiers['voting_rfc'] = voting_rfc
 
 
 # classfiers['svm-svc-2'] = svm.SVC(C=2.0, kernel='rbf', gamma='auto')
