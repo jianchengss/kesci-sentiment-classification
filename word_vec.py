@@ -15,6 +15,7 @@ from __future__ import unicode_literals
 
 import itertools
 import unicodedata
+import config
 
 import os
 import re
@@ -22,6 +23,7 @@ import torch
 
 import comm
 from logger import logger
+import pandas as pd
 
 USE_CUDA = torch.cuda.is_available()
 USE_CUDA = False
@@ -91,7 +93,6 @@ class Voc:
             self.addWord(word)
 
 
-MAX_LENGTH = 10  # Maximum sentence length to consider
 
 
 # Turn a Unicode string to plain ASCII, thanks to
@@ -115,7 +116,7 @@ def normalizeString(s):
 # Returns True iff both sentences in a pair 'p' are under the MAX_LENGTH threshold
 def filter(p):
     # Input sequences need to preserve the last word for EOS token
-    return len(p[0].split(' ')) < MAX_LENGTH and len(p[1].split(' ')) < MAX_LENGTH
+    return len(p[0].split(' ')) < config.word_max_length and len(p[1].split(' ')) < config.word_max_length
 
 
 # Using the functions defined above, return a populated voc object and pairs list
@@ -185,12 +186,12 @@ def padding(data, voc, fillvalue=PAD_token):
     vec = [indexesFromSentence(voc, sentence) for sentence in data]
     result = []
     for v in vec:
-        if len(v)< MAX_LENGTH:
-            while len(v) < MAX_LENGTH:
+        if len(v)< config.word_max_length:
+            while len(v) < config.word_max_length:
                 v.append(PAD_token)
             result.append(v)
-        elif len(v) > MAX_LENGTH:
-            result.append(v[:MAX_LENGTH])
+        elif len(v) > config.word_max_length:
+            result.append(v[:config.word_max_length])
         else:
             result.append(v)
 
@@ -203,6 +204,22 @@ def inputVec(data, voc):
     padList = zeroPadding(indexes_batch)
     return padList
 
-input_vec = padding(train_data['review'], voc)
-logger.info("{} {}".format(len(input_vec[1]), input_vec[1]))
-logger.info("{} {}".format(len(input_vec[2]), input_vec[2]))
+
+
+
+def get_word_vec(data):
+    vec = padding(train_data['review'], voc)
+    vec_df = pd.DataFrame(vec)
+    logger.info("shape of vec: {}".format(vec_df.shape))
+    return vec_df
+
+
+if __name__ == "__main__":
+    input_vec = padding(train_data['review'], voc)
+    logger.info("{} {}".format(len(input_vec[1]), input_vec[1]))
+    logger.info("{} {}".format(len(input_vec[2]), input_vec[2]))
+
+    input_df = pd.DataFrame(input_vec)
+    logger.info(input_df.shape)
+
+    get_word_vec(train_data['review'])

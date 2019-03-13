@@ -11,7 +11,7 @@ import random
 import comm
 from feature import Feature
 
-model_path = "./submissions/model_forest-2_0.8269"
+model_path = "./submissions/model_neural_clf_0.8352"
 reslut_path = model_path.replace('model', 'reslut').replace('0.', '')
 reslut_path = reslut_path + ".csv"
 model = comm.load_file(model_path)

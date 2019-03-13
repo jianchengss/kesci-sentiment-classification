@@ -25,3 +25,7 @@ test_data_path = "./data/test.csv"
 submission_path = "./data/submission.csv"
 
 model_path = './data/model'
+
+
+word_max_length = 10
+tfidf_min_df = 2

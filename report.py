@@ -90,7 +90,7 @@ class Report():
         logger.info('============')
 
         self.auc = np.mean(self.auc_scores)
-        return p_1
+        return auc
 
     def report_final_result(self):
         '''
