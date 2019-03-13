@@ -92,10 +92,9 @@ def cv():
 
     r = Report()
     auc = r.report_one_folder(test_y, proba)
-    model_path = './data/model-{:4f}'.format(auc)
+    model_path = './data/model-{:.4f}'.format(auc)
     comm.save_file(net, model_path)
     return  model_path
-
 
 def predict_submission(net, path):
     import pandas as pd
