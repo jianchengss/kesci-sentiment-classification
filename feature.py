@@ -46,7 +46,7 @@ class Feature():
         self.test_features = []
 
         self.tfidf_vec()
-        self.word_vec()  # 加了会很低
+        # self.word_vec()  # 加了会很低
 
         self.X = pd.concat(self.train_features, axis=1)
         self.test_X = pd.concat(self.test_features, axis=1)

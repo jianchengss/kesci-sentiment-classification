@@ -47,11 +47,12 @@ def predict(x, net):
 
 
 def train(x, y):
-    epoches = 100
+    epoches = 20
     all_loss = 0
     net = SoftMax(n_feature=len(x[0]), n_hidden=10, n_out=2)
     opitmizer = torch.optim.SGD(net.parameters(), lr=0.03)
     loss_fun = nn.MSELoss()  # 选择 均方差为误差函数
+    # loss_fun = nn.NLLLoss()
     for i in range(epoches):
         Length = len(x)
         loss_data = 0
@@ -84,7 +85,8 @@ y = f.y
 
 
 def cv():
-    train_x, test_x, train_y, test_y = train_test_split(x, y, random_state=1, test_size=0.2)
+    train_x, test_x, train_y, test_y = train_test_split(x, y, random_state=1, test_size=0.1)
+    logger.info("train/test: {}/{}".format(len(train_y), len(test_y)))
     net = train(train_x, train_y)
     # net = comm.load_file('./data/model')
     proba = predict(test_x, net)
@@ -110,9 +112,11 @@ def predict_submission(net, path):
 
 
 if __name__ == "__main__":
-    model_path = cv()
-
+    # model_path = cv()
+    net = train(x, y)
     # model_path = './data/model-0.8369'
-    net = comm.load_file(model_path)
-    result_path = model_path.replace('model', 'result') + ".csv"
+    # net = comm.load_file(model_path)
+    # result_path = model_path.replace('model', 'result') + ".csv"
+
+    result_path = './data/result-0.20190314.csv'
     predict_submission(net, result_path)
