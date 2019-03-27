@@ -117,10 +117,8 @@ def filter(p):
     return len(p[0].split(' ')) < config.word_max_length and len(p[1].split(' ')) < config.word_max_length
 
 
-# Using the functions defined above, return a populated voc object and pairs list
-def loadPrepareData(data, corpus_name):
+def loadPrepareData(voc, data):
     logger.info("Start preparing training data ...")
-    voc = Voc(corpus_name)
     for line in data['review']:
         if filter(line):
             voc.addSentence(line)
@@ -131,7 +129,12 @@ def loadPrepareData(data, corpus_name):
 corpus_name = 'train'
 datafile = './data/train.csv'
 train_data = comm.load_df(datafile)
-voc = loadPrepareData(train_data, corpus_name)
+testfile = './data/test.csv'
+test_data = comm.load_df(testfile)
+
+voc = Voc(corpus_name)
+loadPrepareData(voc, train_data)
+loadPrepareData(voc, test_data)
 
 MIN_COUNT = 3  # Minimum word count threshold for trimming
 
@@ -205,6 +208,7 @@ def inputVec(data, voc):
 
 def get_word_vec(data):
     vec = padding(train_data['review'], voc)
+    # TODO
     vec_df = pd.DataFrame(vec)
     logger.info("shape of vec: {}".format(vec_df.shape))
     return vec_df

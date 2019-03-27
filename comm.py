@@ -54,7 +54,8 @@ class GarnetException(Exception):
 def save_file(obj, file_path):
     '''
     保存文件
-    :param file_path:
+    :param obj: 要保存的对象
+    :param file_path: 保存对象的地址
     :return:
     '''
     with open(file_path, 'wb') as f:
@@ -65,8 +66,8 @@ def save_file(obj, file_path):
 
 def load_file(file_path):
     '''
-    从文件中加载
-    :param file_path:
+    从制定的path中加载对象
+    :param file_path: 对象的地址
     :return:
     '''
     with open(file_path, 'rb') as f:
@@ -83,6 +84,11 @@ def dump_submission(data, path=config.submission_path):
 
 
 def load_df(path):
+    '''
+    加载指定路径的数据
+    :param path:
+    :return: DataFrame
+    '''
     fr = codecs.open(path, 'rb', 'utf-8', 'ignore')
     df = pd.read_csv(fr, lineterminator='\n')
     logger.info("Loaded data from: {}".format(path))

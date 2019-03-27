@@ -6,39 +6,26 @@
 
 
 import pandas as pd
-import random
 
 import comm
 from feature import Feature
 
+# 使用的模型文件
 model_path = "./submissions/model_neural_clf_0.8352"
 reslut_path = model_path.replace('model', 'reslut').replace('0.', '')
-reslut_path = reslut_path + ".csv"
-model = comm.load_file(model_path)
+reslut_path = reslut_path + ".csv"  # 结果保存路径
+model = comm.load_file(model_path)  # 加载模型
 
 feature = Feature()
-test_feature = feature.test_X
-
+test_feature = feature.test_X  # 测试文件特征
 ids = feature.test_ids
+# 预测过程，结果为两个label的概率
 predict_proba = model.predict_proba(test_feature)
-proba = predict_proba[:, 1]
+proba = predict_proba[:, 1]  # 这里只取1的概率
 
-data = []
-
-# idx = 1
-# diff = 1  # 记录偏移量  id中没有 355
-# while (idx < 2713):
-#     if ids[idx - diff] != idx:
-#         r = float("{:.6f}".format(random.random()))
-#         data.append([idx, r])
-#         idx += 1
-#         diff += 1
-#     else:
-#         data.append([idx, proba[idx - diff]])
-#         idx += 1
+data = []  # 最终结果
 assert len(ids) == len(proba)
-for id , p in zip(ids, proba):
+for id, p in zip(ids, proba):
     data.append([id, p])
-
 result = pd.DataFrame(data, columns=['ID', "Pred"])
 comm.dump_submission(result, path=reslut_path)

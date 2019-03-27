@@ -5,19 +5,23 @@
 # @File    : feature.py
 
 
-import comm
-import config
 import pandas as pd
+from sklearn.feature_extraction.text import TfidfVectorizer
+
+import config
 import word_vec
 from logger import logger
-from sklearn.feature_extraction.text import TfidfVectorizer
 
 
 class TFIDF():
+    '''
+    提取文本的TFIDF特征
+    '''
+
     def __init__(self, data, min_df=1):
         '''
         初始化并拟合数据集
-        :param data:
+        :param data:训练集文本
         '''
         self.data = data
         logger.info('init TfidfVectorizer')
@@ -29,24 +33,36 @@ class TFIDF():
     def transform(self, data):
         '''
         拟合新的数据集
-        :param data:
-        :return:
+        :param data: 测试集文本
+        :return: 测试集的TFIDF向量
         '''
         return self.tfidf.transform(data).toarray()
 
 
 class Feature():
+    '''
+    特征提取的封装类
+    '''
+
     def __init__(self):
+        import comm
+        # 加载训练集和测试集数据
         self.train_data = comm.load_df(config.train_data_path)
         self.test_data = comm.load_df(config.test_data_path)
-        self.test_ids = self.test_data["ID"]
-        self.y = self.get_target()
+        self.test_ids = self.test_data["ID"]  # 测试集中所有的id
+        self.y = self.get_target()  # 训练集中的情感标签
 
         self.train_features = []
         self.test_features = []
 
-        self.tfidf_vec()
-        # self.word_vec()  # 加了会很低
+        # 提取TFIDF特征
+        train_vec, test_vec = self.tfidf_vec()
+        self.train_features.append(pd.DataFrame(train_vec))
+        self.test_features.append(pd.DataFrame(test_vec))
+
+        # train_word_vec, test_word_vec = self.word_vec()  # 加了会很低
+        # self.train_features.append(pd.DataFrame(train_word_vec))
+        # self.test_features.append(pd.DataFrame(test_word_vec))
 
         self.X = pd.concat(self.train_features, axis=1)
         self.test_X = pd.concat(self.test_features, axis=1)
@@ -57,34 +73,38 @@ class Feature():
     def get_target(self):
         def get_lable(label):
             if label == 'Positive':
-                return 1
+                return 1  # Positive 用1表示
             else:
                 return 0
 
+        # 将训练集中的标签用 0 1表示
         self.train_data['y'] = self.train_data.apply(lambda x: get_lable(x['label']), axis=1)
         return self.train_data['y'].values.astype('int')
 
     def tfidf_vec(self):
         logger.info("start collect tfidf vec.")
+        # 用训练集初始化TFIDF
         tfidf = TFIDF(self.train_data['review'], min_df=config.tfidf_min_df)
         train_vec = tfidf.train_vec
+        # 提取测试集的TFIDF特征
         test_vec = tfidf.transform(self.test_data['review'])
         logger.info("shape of trian tfidf: {}".format(train_vec.shape))
         logger.info("shape of test tfidf: {}".format(test_vec.shape))
-
-        self.train_features.append(pd.DataFrame(train_vec))
-        self.test_features.append(pd.DataFrame(test_vec))
+        return train_vec, test_vec
 
     def word_vec(self):
+        '''
+        提取文本中的词向量表示
+        :return: 训练集词向量，测试集词向量
+        '''
         logger.info("word vec")
         train_word_vec = word_vec.get_word_vec(self.train_data['review'])
         test_word_vec = word_vec.get_word_vec(self.test_data['review'])
 
         logger.info("shape of trian word_vec: {}".format(train_word_vec.shape))
         logger.info("shape of test word_vec: {}".format(test_word_vec.shape))
-
-        self.train_features.append(pd.DataFrame(train_word_vec))
-        self.test_features.append(pd.DataFrame(test_word_vec))
+        self.voc = word_vec.voc
+        return train_word_vec, test_word_vec
 
 
 def tfidf_vec(corpus):

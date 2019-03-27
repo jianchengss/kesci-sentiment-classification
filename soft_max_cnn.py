@@ -15,6 +15,7 @@ import torch.nn.functional as F
 import torch.optim
 from sklearn.model_selection import train_test_split
 from torch.autograd import Variable
+from model import SoftMax_CNN, SoftMax_CNN2, TextCNN
 
 import config
 from feature import Feature
@@ -30,121 +31,6 @@ use_cuda = torch.cuda.is_available()
 # use_cuda = False
 logger.info('use_cuda: {}'.format(use_cuda))
 
-
-class SoftMax(nn.Module):
-    def __init__(self, n_feature, n_hidden, n_out, vocb_size):
-        super(SoftMax, self).__init__()
-        self.hidden = nn.Linear(n_feature, int(n_feature / 2))
-        self.prelu = torch.nn.PReLU()
-        self.hidden2 = nn.Linear(int(n_feature / 2), n_hidden)
-        self.relu = torch.nn.ReLU()
-
-        self.out = nn.Linear(n_hidden, n_out)
-
-        self.embedding_dim = 10
-        self.embeding = nn.Embedding(vocb_size, self.embedding_dim)
-        # self.embeding = nn.Embedding(vocb_size, embedding_dim, _weight=embedding_matrix)
-        self.conv1 = nn.Sequential(
-            nn.Conv2d(in_channels=1, out_channels=16, kernel_size=5,
-                      stride=1, padding=2),
-
-            nn.ReLU(),
-            nn.MaxPool2d(kernel_size=2)  # (16,64,64)
-        )
-        self.conv2 = nn.Sequential(
-            nn.Conv2d(in_channels=16, out_channels=32, kernel_size=5, stride=1, padding=2),
-            nn.ReLU(),
-            nn.MaxPool2d(2)
-        )
-        self.conv3 = nn.Sequential(
-            nn.Conv2d(in_channels=32, out_channels=64, kernel_size=5, stride=1, padding=2),
-            nn.ReLU(),
-            nn.MaxPool2d(2)
-        )
-        self.conv4 = nn.Sequential(  # (16,64,64)
-            nn.Conv2d(in_channels=64, out_channels=128, kernel_size=5, stride=1, padding=2),
-            nn.ReLU(),
-            nn.MaxPool2d(2)
-        )
-        self.out_word = nn.Linear(128, 2)
-        linear_input_dim = n_hidden + 128
-        self.merge_out = nn.Linear(linear_input_dim, int(linear_input_dim / 2))
-        self.relu_out = torch.nn.ReLU()
-        # self.final_out = nn.Linear(int(linear_input_dim/ 2), 2)
-        self.final_out = nn.Linear(linear_input_dim, 2)
-
-    def forward(self, x, word_x):
-        x = self.hidden(x)
-        x = self.relu(x)
-        # x = self.prelu(x)
-        x = self.hidden2(x)
-        x = torch.sigmoid(x)
-        # x = self.out(x)
-
-        word_x = self.embeding(word_x)
-        # word_x = word_x.unsqueeze(1)
-        word_x = word_x.view(1, 1, config.word_max_length, self.embedding_dim)
-        # print(x.size())
-        word_x = self.conv1(word_x)
-        word_x = self.conv2(word_x)
-        word_x = self.conv3(word_x)
-        word_x = self.conv4(word_x)
-        word_x = word_x.view(word_x.size(0), -1)  # 将（batch，outchanel,w,h）展平为（batch，outchanel*w*h）
-        # print(x.size())
-        # word_x = self.out_word(word_x)
-
-        x = torch.cat([x, word_x], dim=1)
-        # x = self.merge_out(x)
-        # x = torch.sigmoid(x)
-        # x = self.relu_out(x)
-        x = self.final_out(x)
-        x = F.softmax(x, dim=1)  # 返回的是每个类的概率
-        return x
-
-
-class TextCNN(nn.Module):
-    def __init__(self, vocb_size, embedding_matrix, embedding_dim):
-        super(TextCNN, self).__init__()
-        self.embedding_dim = embedding_dim
-        self.embeding = nn.Embedding(vocb_size, embedding_dim)
-        # self.embeding = nn.Embedding(vocb_size, embedding_dim, _weight=embedding_matrix)
-        self.conv1 = nn.Sequential(
-            nn.Conv2d(in_channels=1, out_channels=16, kernel_size=5,
-                      stride=1, padding=2),
-
-            nn.ReLU(),
-            nn.MaxPool2d(kernel_size=2)  # (16,64,64)
-        )
-        self.conv2 = nn.Sequential(
-            nn.Conv2d(in_channels=16, out_channels=32, kernel_size=5, stride=1, padding=2),
-            nn.ReLU(),
-            nn.MaxPool2d(2)
-        )
-        self.conv3 = nn.Sequential(
-            nn.Conv2d(in_channels=32, out_channels=64, kernel_size=5, stride=1, padding=2),
-            nn.ReLU(),
-            nn.MaxPool2d(2)
-        )
-        self.conv4 = nn.Sequential(  # (16,64,64)
-            nn.Conv2d(in_channels=64, out_channels=128, kernel_size=5, stride=1, padding=2),
-            nn.ReLU(),
-            nn.MaxPool2d(2)
-        )
-        self.out = nn.Linear(128, 2)
-
-    def forward(self, x):
-        x = self.embeding(x)
-        x = x.view(x.size(0), 1, config.word_max_length, self.embedding_dim)
-        # print(x.size())
-        x = self.conv1(x)
-        x = self.conv2(x)
-        x = self.conv3(x)
-        x = self.conv4(x)
-        x = x.view(x.size(0), -1)  # 将（batch，outchanel,w,h）展平为（batch，outchanel*w*h）
-        # print(x.size())
-        x = self.out(x)
-        return F.softmax(x, dim=1)  # 返回的是每个类的概率
-        # return x
 
 
 from logger import logger
@@ -180,7 +66,7 @@ def predict(net, tfidf_vec, word_vec):
 def train(x, y, word_vec_x):
     epoches = 10
     all_loss = 0
-    net = SoftMax(n_feature=len(x[0]), n_hidden=10, n_out=2, vocb_size=voc.num_words)
+    net = SoftMax_CNN(n_feature=len(x[0]), n_hidden=10, n_out=2, vocb_size=voc.num_words)
     if use_cuda:
         net = net.cuda()
     opitmizer = torch.optim.SGD(net.parameters(), lr=0.03)

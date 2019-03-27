@@ -15,11 +15,20 @@ from torch.autograd import Variable
 class SoftMax(nn.Module):
     def __init__(self, n_feature, n_hidden, n_out):
         super(SoftMax, self).__init__()
-        self.hidden = nn.Linear(n_feature, n_hidden)
+        self.hidden = nn.Linear(n_feature, int(n_feature/ 2))
+        self.relu = torch.nn.PReLU()
+        self.hidden2 = nn.Linear(int(n_feature/ 2), n_hidden)
+        self.relu2 = torch.nn.ReLU()
+
         self.out = nn.Linear(n_hidden, n_out)
 
     def forward(self, x):
-        x = torch.sigmoid(self.hidden(x))
+        x = self.hidden(x)
+        x = torch.sigmoid(x)
+        # x = self.relu(x)
+        x = self.hidden2(x)
+        # x = self.relu2(x)
+        x = torch.sigmoid(x)
         x = self.out(x)
         return F.softmax(x, dim=1)  # 返回的是每个类的概率
 
@@ -47,7 +56,7 @@ def predict(x, net):
 
 
 def train(x, y):
-    epoches = 20
+    epoches = 10
     all_loss = 0
     net = SoftMax(n_feature=len(x[0]), n_hidden=10, n_out=2)
     opitmizer = torch.optim.SGD(net.parameters(), lr=0.03)
@@ -96,7 +105,8 @@ def cv():
     auc = r.report_one_folder(test_y, proba)
     model_path = './data/model-{:.4f}'.format(auc)
     comm.save_file(net, model_path)
-    return  model_path
+    return model_path
+
 
 def predict_submission(net, path):
     import pandas as pd
@@ -111,12 +121,25 @@ def predict_submission(net, path):
     comm.dump_submission(result, path=path)
 
 
-if __name__ == "__main__":
-    # model_path = cv()
+def train_all_data():
+    '''
+    用数据集中所有数据进行模型训练 然后预测结果
+    :return:
+    '''
     net = train(x, y)
-    # model_path = './data/model-0.8369'
-    # net = comm.load_file(model_path)
-    # result_path = model_path.replace('model', 'result') + ".csv"
-
     result_path = './data/result-0.20190314.csv'
     predict_submission(net, result_path)
+
+
+def train_and_report():
+    model_path = cv()
+    # model_path = './data/model-0.8369'
+    net = comm.load_file(model_path)
+    result_path = model_path.replace('model', 'result') + ".csv"
+    predict_submission(net, result_path)
+
+
+if __name__ == "__main__":
+    train_and_report()
+
+    # train_all_data()

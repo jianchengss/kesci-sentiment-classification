@@ -103,5 +103,8 @@ class Report():
             "1 avg result p: {:.4f} r: {:.4f} f {:.4f}".format(np.mean(self.p1), np.mean(self.r1), np.mean(self.f1)))
 
         if len(self.auc_scores) > 0:
+            ave_auc = np.mean(self.auc_scores)
             logger.info(
-                "AUC avg score: {:.4f}".format(np.mean(self.auc_scores)))
+                "AUC avg score: {:.4f}".format(ave_auc))
+            return ave_auc
+        return np.mean(self.p1)

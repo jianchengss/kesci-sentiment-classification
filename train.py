@@ -23,7 +23,6 @@ from sklearn.neural_network import MLPClassifier
 from sklearn.tree import DecisionTreeClassifier
 
 import config
-import feature
 from logger import logger
 from report import Report
 
@@ -93,19 +92,17 @@ voting_rfc = VotingClassifier(
 # classfiers['rfc_5'] = rfc_5
 #
 classfiers['neural_clf'] = neural_clf
-# classfiers['nav_clf'] = nav_clf
-# classfiers['grad_clf'] = grad_clf
-# classfiers['tree_clf'] = tree_clf
-# classfiers['forest-1'] = forest_1
-# classfiers['forest-2'] = forest_2
-# classfiers['voting_clf'] = voting_clf
-# classfiers['voting_rfc'] = voting_rfc
+
+classfiers['nav_clf'] = nav_clf
+classfiers['grad_clf'] = grad_clf
+classfiers['tree_clf'] = tree_clf
+classfiers['forest-1'] = forest_1
+classfiers['forest-2'] = forest_2
+classfiers['voting_clf'] = voting_clf
+classfiers['voting_rfc'] = voting_rfc
 
 
 # classfiers['svm-svc-2'] = svm.SVC(C=2.0, kernel='rbf', gamma='auto')
-
-
-
 
 
 def random_result(num=0):
@@ -120,12 +117,17 @@ def random_result(num=0):
     return result
 
 
-
-
 def cv(X, y, clf):
+    '''
+    交叉验证 Cross-validation
+    :param X: 训练集特征
+    :param y: 目标label
+    :param clf: 分类器
+    :return: 交叉验证过程中的最佳模型
+    '''
     model = None
-    max_p = 0
-    reporter = Report('train')
+    max_p = 0  # 记录实验中最好的模型
+    reporter = Report('train')  # 定义评价器
     for i in range(1, 10):  # 10
         logger.info("Folder {}".format(i))
         x_train, x_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=21 + i)
@@ -134,10 +136,8 @@ def cv(X, y, clf):
                 "Train x data: ({}, {}), Train y data: {}".format(len(x_train), len(x_train[0]), Counter(y_train)))
             logger.info("Test x data: ({}, {}), Test y data: {}".format(len(x_test), len(x_test[0]), Counter(y_test)))
 
-        clf.fit(x_train, y_train)
-
-        y_hat = clf.predict(x_test)
-        predict_proba = clf.predict_proba(x_test)
+        clf.fit(x_train, y_train)  # 训练过程
+        predict_proba = clf.predict_proba(x_test)  # 返回每个类别的概率值
 
         # TODO 随机 看结果对比submission结果
         p = reporter.report_one_folder(y_test, predict_proba, threshold=0.5)
@@ -145,12 +145,6 @@ def cv(X, y, clf):
             max_p = p
             logger.info("Max result: {:.4f}".format(p))
             model = clf
-
-            # from process import comm
-            # comm.save_file((y_test, predict_proba), "/tmp/internal_data")
-
-        # mtx = metrics.classification_report(y_test, clf.predict(x_test))
-        # logger.info("\n{}".format(mtx))
     reporter.report_final_result()
     return model, reporter
 
@@ -220,7 +214,9 @@ def train(X, y, clf):
 
 
 def train_cv(X, y):
-    # cv for ever clf
+    '''
+    对classfiers中的每个分类器执行 CV过程
+    '''
     reporters = {}
     for index, (name, clf) in enumerate(classfiers.items()):
         logger.info('{}: {}'.format(name, clf))
@@ -242,13 +238,10 @@ def train_cv(X, y):
 
 if __name__ == "__main__":
     import comm
-    import feature
     from feature import Feature
 
-    f = Feature()
-
-
+    f = Feature()  # 特征工程
 
     # random_forest_param_search(X, y)
-    train_cv(f.X, f.y)
+    train_cv(f.X, f.y)  # 十折交叉过程
     # train(X, y, voting_clf)

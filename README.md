@@ -3,9 +3,9 @@
 [文本情感分类模型搭建 | 练习赛](https://www.kesci.com/home/competition/5c77ab9c1ce0af002b55af86)
 
 
-## GitHub
+## 实验过程解析
 
-https://github.com/jianchengss/kesci-sentiment-classification.git
+https://www.jiancheng.ai/2019/03/15/kesci-sentiment-classification/
 
 ## 赛题描述
 
